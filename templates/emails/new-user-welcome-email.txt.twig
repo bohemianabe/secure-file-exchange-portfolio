@@ -1,0 +1,17 @@
+Welcome to {{ app_name }}, {{ user.getUserProfile().getFirstName()|default('') }},
+
+Your account has been created. To get started, please set your password using the secure link below:
+
+Set Your Password
+{{ setPasswordUrl }}
+
+For your security, this link will expire on
+{{ user.firstLoginTokenExpiresAt|date('F j, Y, g:i a') }}.
+
+If you did not expect this email, please ignore it.
+
+Thanks,
+The {{ app_name }} Team
+---
+This is an automated message, please do not reply.
+© {{ "now"|date("Y") }} {{ app_name }}

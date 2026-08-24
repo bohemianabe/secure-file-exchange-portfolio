@@ -1,0 +1,73 @@
+FROM php:8.4.14-apache
+
+# ag: this links the document root to the Symfony container public directory. One reflects the other.
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+#INI-Files
+COPY ./opcache.ini "$PHP_INI_DIR/conf.d/docker-php-ext-opcache.ini"
+COPY ./xdebug.ini "$PHP_INI_DIR/conf.d/99-xdebug.ini"
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+#Install Packages imagemagick and ghostscript for pdf template uploads
+RUN apt-get update && apt-get install -y \
+    libreoffice \
+    libreoffice-writer \
+    libreoffice-calc \
+    libreoffice-impress \
+    fonts-dejavu \
+    fonts-liberation \
+    libicu-dev \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libwebp-dev \
+    imagemagick \
+    ghostscript \
+    git
+
+RUN docker-php-ext-configure gd \
+    --with-freetype \
+    --with-jpeg \
+    --with-webp \
+    && docker-php-ext-install \
+        gd \
+        intl \
+        opcache \
+        pdo_mysql \
+        zip
+
+# RUN docker-php-ext-configure gd \
+#         --with-freetype \
+#         --with-jpeg \
+#         --with-webp
+# RUN docker-php-ext-install gd
+
+RUN docker-php-ext-configure intl
+# RUN docker-php-ext-configure gd '--with-jpeg' '--with-freetype'
+RUN docker-php-ext-install intl opcache pdo_mysql zip gd
+RUN pecl install xdebug
+RUN a2enmod rewrite
+
+#INSTALL APCU
+RUN echo "memory_limit = 2048M" > /usr/local/etc/php/conf.d/99-upload-limits.ini \
+ && echo "upload_max_filesize = 2048M" >> /usr/local/etc/php/conf.d/99-upload-limits.ini \
+ && echo "post_max_size = 2048M" >> /usr/local/etc/php/conf.d/99-upload-limits.ini \
+ && echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/99-upload-limits.ini \
+ && echo "max_input_time = 600" >> /usr/local/etc/php/conf.d/99-upload-limits.ini
+#APCU
+
+RUN echo "LimitRequestBody 0" >> /etc/apache2/apache2.conf
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN curl -sS https://get.symfony.com/cli/installer | bash && mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
+
+# ag: install npm 
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
+    && apt-get install -y nodejs
+
+# Install NVM
+# RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash

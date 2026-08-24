@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File Uploaded</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        color: #212529;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 20px;
+    }
+    h1 {
+        font-size: 20px;
+        color: #0d6efd;
+    }
+    p {
+        font-size: 15px;
+        line-height: 1.5;
+        margin: 0;
+    }
+    .btn {
+        display: inline-block;
+        margin: 20px 0;
+        padding: 12px 18px;
+        background-color: #0d6efd;
+        color: #ffffff !important;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+    .footer {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 20px;
+        border-top: 1px solid #dee2e6;
+        padding-top: 10px;
+    }
+    .mt-2{
+        margin-top: 1rem;
+    }
+    .mb-2{
+        margin-bottom: 1rem;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ recipientClient.getName()|default('Hello there,') }},</h1>
+
+        {% if writtenMessage is defined and writtenMessage is not null %}
+            {{ writtenMessage }}
+            <br>
+        {% else %}
+            <p class="mb-2">
+                A new file has been uploaded by {{ senderUserProfile.getFullName|default('your team ') }} on {{ app_name }} and is now available for viewing. <br>
+            </p>
+
+            <p class="mb-2">
+                Please log in at your earliest convenience.
+            <p>
+
+        {% endif %}
+
+        <p style="text-align:center; margin: 20px 0;">
+            <a href="{{ linkUrl }}" style="background-color:#3b82f6; color:#fff; padding:10px 20px;text-decoration:none;border-radius:5px;">
+            Login
+            </a>
+        </p>
+
+        <hr>
+
+        {# ag: add this code to check for when CUP uploads a file. CUP do not have a signature datapoint #}
+        {% if attribute(senderUserProfile, 'signature') is defined and attribute(senderUserProfile, 'signature') is not empty %}
+            {{ attribute(senderUserProfile, 'signature')|raw }}
+        {% else %}
+
+            <p>
+                Thanks, <br>
+                The {{ app_name }} Team
+            </p>
+        {% endif %}
+
+        <div class="footer">
+        <p>This is an automated message, please do not reply.</p>
+        <p>&copy; {{ "now"|date("Y") }} {{ app_name }}</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,105 @@
+---
+version: "3"
+
+services:
+    php-apache:
+        container_name: "${CONTAINER_NAME_PREFIX}-apache-php"
+        build: ./php-apache
+        volumes:
+            - ${PATH_TO_SYMFONY_PROJECT}:/var/www/html
+        ports:
+            # - "80:80"
+            - "8000:80"
+            - "443:443"
+        networks:
+            - secure-file-exchange
+    db:
+        container_name: "${CONTAINER_NAME_PREFIX}-mariadb"
+        image: mariadb:10.6.4-focal
+        restart: unless-stopped
+        environment:
+            - MARIADB_DATABASE=${DB_NAME}
+            - MARIADB_ROOT_USER=${ROOT_USER}
+            - MARIADB_ROOT_PASSWORD=${ROOT_USER_PASSWORD}
+            - MARIADB_USER=${DB_USER}
+            - MARIADB_PASSWORD=${DB_PASSWORD}
+        volumes:
+            - secure_file_exchange_db_data:/var/lib/mysql
+        # ports:
+        #     - "3306:3306"
+        networks:
+            - secure-file-exchange
+    phpmyadmin:
+        container_name: "${CONTAINER_NAME_PREFIX}-phpmyadmin"
+        image: phpmyadmin/phpmyadmin
+        restart: unless-stopped
+        environment:
+            PMA_HOST: db
+            MYSQL_ROOT_PASSWORD: "${ROOT_USER_PASSWORD}"
+        ports:
+            - "8082:80"
+        networks:
+            - secure-file-exchange
+        depends_on:
+            - db
+    mailer:
+        container_name: "${CONTAINER_NAME_PREFIX}-mailer"
+        image: schickling/mailcatcher
+        restart: unless-stopped
+        ports:
+            - "1025:1025"
+            - "1080:1080"
+        networks:
+            - secure-file-exchange
+
+    adminer:
+        container_name: "${CONTAINER_NAME_PREFIX}-adminer"
+        image: adminer
+        ports:
+            - "8080:8080"
+        networks:
+            - secure-file-exchange
+
+    ngrok:
+        image: ngrok/ngrok:latest
+        command: http php-apache:80
+        environment:
+            NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+        ports:
+            - "4040:4040"
+        depends_on:
+            - php-apache
+        networks:
+            - secure-file-exchange
+
+    messenger-worker:
+        # ag: adding this messenger-worker so that messenger runs in the background upon starting the container
+        container_name: "${CONTAINER_NAME_PREFIX}-messenger-audit"
+        build: ./php-apache # reuse the same PHP image/build
+        command: >
+            bash -lc "php bin/console messenger:consume async_audit async_welcome_email
+            --limit=500 --time-limit=3600 --memory-limit=256M --sleep=1000 -vv"
+        restart: unless-stopped
+        environment:
+            APP_ENV: dev # or dev/prod while developing
+            APP_DEBUG: "1"
+            # If you use DATABASE_URL / other envs, add them here or inherit via .env
+            # DATABASE_URL: ${DATABASE_URL}
+        volumes:
+            - ${PATH_TO_SYMFONY_PROJECT}:/var/www/html
+        depends_on:
+            - db
+        networks:
+            - secure-file-exchange
+        # optional: keep container logs from growing unbounded
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "10m"
+                max-file: "5"
+volumes:
+    secure_file_exchange_db_data:
+
+networks:
+    secure-file-exchange:
+        driver: bridge

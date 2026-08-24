@@ -1,0 +1,165 @@
+{% extends 'firm-base.html.twig' %}
+
+{% block title %}Firm - File Manager{% endblock title %}
+{% block body %}
+    <div class="d-flex w-100 flex-column">
+        {% include 'layouts/sections/search-bar-header.html.twig' %}
+        {% include 'layouts/sections/announcement-banner.html.twig' %}
+        <main class="d-flex h-100 container-fluid mt-3 mb-3">
+            <div class="row col-12">
+                <div class="pe-md-0 ps-md-0 mt-sm-2 mt-md-2 mt-lg-0 pe-lg-1 col-lg-8 order-lg-1 order-md-2 order-sm-2">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="col-12 mb-2">
+                                <label class="fw-bold form-label">Client</label>
+                                <select class="form-control select2" id="client-select-dropdown" aria-label="Default select example">
+                                    <option value="">All Clients</option>
+                                    {% for client in clients %}
+                                        <option value="{{ client.uuid }}" 
+                                            {% if selectedClient and selectedClient.uuid == client.uuid %}selected{% endif %}
+                                            >{{ client.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            {# folders #}
+                            {% include 'layouts/sections/folder-content.html.twig' %}
+                            <div class="col-12 mt-3">
+                                <div class="d-flex justify-content-between">
+                                    <h3 class="text-secondary" id="file-manager-description-view">Recent Files</h3>
+                                    <div class="dropdown">
+                                        <button class="btn btn-light dropdown-toggle sort-by-dropdown-btn" type="button" id="dropdownSortByButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Sort By
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownSortByButton">
+                                            <li>
+                                                <a class="dropdown-item file-manager-sort-by-btn" id="" data-sort-by="{{ enum('App\\Enum\\FileFilter').all.value }}" data-sort-by-text={{ enum('App\\Enum\\FileFilter').all.label }}>
+                                                    All
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item file-manager-sort-by-btn" id="" data-sort-by="{{ enum('App\\Enum\\FileFilter').duplicates.value }}" data-sort-by-text={{ enum('App\\Enum\\FileFilter').duplicates.label }}>
+                                                    Duplicates
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                {# table #}
+                                <table id="firm-file-manager-view-table" 
+                                    class="table table-striped table-bordered align-middle"
+                                    data-user-role="{{ app.user.getUserProfile.getUserType }}"
+                                    >
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="file-table-check-all-checkbox"></th>
+                                            <th>File Name</th>
+                                            <th>Uploaded By</th>
+                                            <th>Created At</th>
+                                            <th>Edit</th>
+                                            <th>Access Log</th>
+                                        </tr>
+                                    </thead>
+                                    {# <tbody>
+                                        {% for file in allFiles %}
+                                            {% if app.user.getId() != user.getId() %}
+                                                <tr>
+                                                    <td>{{ user.getId() }}</td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </tbody> #}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pe-0 ps-md-0 ps-lg-1 col-lg-4 order-lg-1 order-md-1 order-sm-1">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <label class="fw-bold form-label">Usage Storage {% if selectedClient is not null %}<small class="text-secondary"> - {{ selectedClient.name }}{% endif %}</small></label>
+                            <div class="d-flex justify-content-center">
+                                <div class="w-100" style="height: 320px;">
+                                    <canvas id="storage-chart" data-used-percent="{{ usagePercent }}"></canvas>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <h2>{{ usagePercent|number_format(1) }}%</h2>
+                                <h4 class="text-primary fw-bold">{{ firm.getStoragePlan().getName() }} Plan</h4>
+                            </div>
+                            <label class="fw-bold form-label">Recent Files</label>
+                            {% if fileBreakdowns is not null and clients is not null %}
+                                <div class="d-flex flex-wrap">
+                                    {% for breakdown in fileBreakdowns %}
+                                        <div class="card border shadow-none mb-2 ms-2 col-lg-12 col-md-4">
+                                            <div class="p-2">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar align-self-center me-3">
+                                                        <div class="rounded {{ breakdown.bgClass }}">
+                                                            <i class="{{ breakdown.icon}}"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="overflow-hidden me-auto">
+                                                        <h5 class="font-size-15 text-truncate mb-1">{{ breakdown.fileType|capitalize }}</h5>
+                                                        <p class="text-secondary text-truncate mb-0">{{ breakdown.fileCount }}</p>
+                                                    </div>
+                                                    <div class="ms-2">
+                                                        <p class="text-secondary">{{ breakdown.totalBytesHuman }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="mt-4 pt-3">
+                                <div class="alert alert-success alert-dismissible fade show px-3 mb-0" role="alert">
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div class="mb-3">
+                                        <i class="bx bxs-folder-open h1 text-success"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-success">{{ firm.getStoragePlan().getName() }}</h5>
+                                        <p>{{ firm.getStoragePlan().getDescription() }}</p>
+                                        <div class="text-center">
+                                            <button type="button" class="btn btn-link text-decoration-none text-success">Upgrade <i class="mdi mdi-arrow-right"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main> 
+        <!-- Footer -->
+        {% include 'layouts/sections/footer.html.twig' %}
+    </div>
+
+    {# to throw notyf message after getting a controller flash call #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    notyf.{{ label }}('{{ message|e('js') }}');
+                });
+            </script>
+        {% endfor %}
+    {% endfor %}
+
+    {% block javascript %}
+        {{ encore_entry_script_tags('firm-file-manager-logic') }}
+        <script>
+        </script>
+    {% endblock %}
+
+    {# ag: iterate modals needed, passed from the controller #}
+    {% if modals_to_include is defined %}
+        {% for modal in modals_to_include %}
+            {% include 'layouts/modals/firm/' ~ modal %}
+        {% endfor %}
+    {% endif %}
+    {% include 'layouts/modals/default-template.html.twig' %}
+    {% include 'layouts/modals/default-offcanvas-right.html.twig' %}
+{% endblock %}

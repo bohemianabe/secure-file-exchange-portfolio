@@ -1,0 +1,43 @@
+{% if is_granted('IS_AUTHENTICATED_FULLY') %}
+    {% set currentRoute = app.request.attributes.get('_route') %}
+    {% if is_granted('ROLE_ADMIN') %}
+        {{ include('/layouts/sections/partials/_admin-sidebar-menu.html.twig') }}
+    {% elseif is_granted('ROLE_FIRM') %}
+        {# ag: desktop sidebar #}
+        <aside class="sidebar d-none d-lg-block">
+            {{ include('/layouts/sections/partials/_firm-sidebar-menu.html.twig') }}
+        </aside>
+        <div class="b-example-divider"></div>
+
+        {# ag: mobile/tablet sidebar view #}
+        <div
+            class="offcanvas offcanvas-start d-lg-none w-auto"
+            tabindex="-1"
+            id="mobileSidebar"
+            aria-labelledby="mobileSidebarLabel">
+
+            <div class="offcanvas-body p-0">
+                {{ include('/layouts/sections/partials/_firm-sidebar-menu.html.twig') }}
+            </div>
+        </div>
+
+    {% elseif is_granted('ROLE_CLIENT') %}
+        {# ag: desktop sidebar #}
+        <aside class="sidebar d-none d-lg-block">
+            {{ include('/layouts/sections/partials/client-sidebar-menu.html.twig') }}
+        </aside>
+        <div class="b-example-divider"></div>
+
+        {# ag: mobile/tablet sidebar view #}
+        <div
+            class="offcanvas offcanvas-start d-lg-none w-auto"
+            tabindex="-1"
+            id="mobileSidebar"
+            aria-labelledby="mobileSidebarLabel">
+
+            <div class="offcanvas-body p-0">
+                {{ include('/layouts/sections/partials/client-sidebar-menu.html.twig') }}
+            </div>
+        </div>
+    {% endif %}
+{% endif %}

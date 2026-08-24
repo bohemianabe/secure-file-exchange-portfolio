@@ -1,0 +1,212 @@
+<nav id="sidebar-menu"
+    class="sidebar-nav d-flex flex-column flex-shrink-0 p-3 border-right"
+    style="width: 250px; position: sticky; top: 0; height: 100vh; overflow-y: auto;">        
+    <a href="{{ path('firm_dashboard' )}}" class="d-flex flex-wrap align-items-center mb-3 justify-content-center text-decoration-none">
+        {% if firm.getLogo() is not empty %}
+            <img style="max-height:5rem;" id="logoPreview" src="{{ asset(firm_logo_path ~ '/' ~ firm.getLogo() ) }}" />
+        {% else %}
+            <img src="{{ asset('images/secure-file-color.png') }}" style="height:5rem;" />
+        {% endif %}
+        <div class="col-12 mt-4 text-center">
+            <span class="fs-4 text-secondary">{% if firm.getName() %}{{ firm.getName() }}{% else %}{{ app_name }}{% endif %}</span>
+        </div>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item mb-2">
+            <a href="{{ path('firm_dashboard') }}" class="nav-link {{ currentRoute == 'firm_dashboard' ? 'active' : '' }}" aria-current="page">
+                <i class="fa-solid fa-grip me-2"></i>
+                Dashboard
+            </a>
+        </li>
+        <li class="mb-2">
+            <a href="{{ path('firm_notification_view') }}" class="nav-link {{ currentRoute == 'firm_notification_view' ? 'active' : '' }}">
+                <i 
+                class="{% if notifications is defined and notifications is not null and notifications|length > 0 %}far fa-bell me-2{% else %}far fa-bell-slash me-2{% endif %}"
+                id="menu-bar-notification-bell-icon"
+                >
+                </i>
+                Notification (<span class="firm-sidebar-nav-notification-num" id="sidebar-nav-notification-num">{{ notifications|length }}</span>)
+            </a>
+        </li>
+        {% if is_granted(constant('App\\Security\\Voter\\StoragePlanVoter::DOCUSIGN'), firm) %}
+            <li>
+                <!-- Templates parent -->
+                <button
+                    id="docu-sign-menu-parent-dropdown"
+                    class="nav-link d-flex justify-content-between align-items-center w-100"
+                    {% if currentRoute != 'docu_sign_template_view' and currentRoute != 'docu_sign_request_view' %}data-bs-toggle="collapse"{% endif %}
+                    data-bs-target="#docuSignSubmenu"
+                    role="button"
+                    aria-expanded="false"
+                    aria-controls="docuSignSubmenu"
+                    >
+                    <div>
+                        <i class="far fa-file-pdf me-2"></i>
+                        <span>Docu Sign</span>
+                    </div>
+                    <i class="fas {% if currentRoute != 'docu_sign_template_view' and currentRoute != 'docu_sign_request_view' %}fa-chevron-left small{% else %}fa-chevron-down{% endif %}" id="docu-sign-dropdown-carrot"></i>
+                </button>
+
+                <!-- Submenu -->
+                <div 
+                    class="{% if currentRoute != 'docu_sign_template_view' and currentRoute != 'docu_sign_request_view' and currentRoute != 'docu_sign_template_gallary_view' %}collapse{% endif %} ps-3 mt-2" 
+                    id="docuSignSubmenu">
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="{{ path('docu_sign_request_view') }}" 
+                            class="nav-link {{ currentRoute == 'docu_sign_request_view' ? 'active' : '' }} ps-4 fw-normal">
+                            - Sign Request
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ path('docu_sign_template_view') }}" class="nav-link {{ currentRoute == 'docu_sign_template_view' ? 'active' : '' }} ps-4 fw-normal">- Templates</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('docu_sign_template_gallary_view') }}" class="nav-link ps-4 fw-normal {{ currentRoute == 'docu_sign_template_gallary_view' ? 'active' : '' }}">
+                                - Template Gallery
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+            </li>
+        {% endif %}
+        {% if is_granted(constant('App\\Security\\Voter\\StoragePlanVoter::EXTERNAL_FILE_REQUESTS'), firm) %}
+            <li class="mb-2">
+                <a href="{{ path('firm_request_files_view') }}"  class="nav-link {{ currentRoute == 'firm_request_files_view' ? 'active' : '' }}">
+                    <i class="fas fa-exchange-alt me-2"></i>
+                    Request Files
+                </a>
+            </li>
+        {% endif %}
+        <li class="mb-2">
+            <a href="{{ path('firm_file_manager') }}"  class="nav-link {{ currentRoute == 'firm_file_manager' ? 'active' : '' }}">
+                <i class="fas fa-folder-open me-2"></i>
+                File Manager
+            </a>
+        </li>
+        {% if app.user.getUserProfile.getUserType() != constant('App\\Entity\\FirmUserProfiles::USER_TYPE_EMPLOYEE') %}
+            <li class="mb-2">
+                <a href="{{ path('firm_user_view') }}" class="nav-link {{ currentRoute == 'firm_user_view' ? 'active' : '' }}">
+                    <i class="fa-solid fa-users me-2"></i>
+                    Users
+                </a>
+            </li>
+        {% endif %}
+        <li class="mb-2">
+            <a href="{{ path('client_view') }}" class="nav-link {{ currentRoute == 'client_view' or currentRoute == 'client_view_detail' or currentRoute == 'firm_view_detail_chat' ? 'active' : '' }}">
+                <i class="far fa-building me-2"></i>
+                Clients
+            </a>
+        </li>
+        <li class="mb-2">
+            <a href="{{ path('firm_canned_messages_view') }}" class="nav-link {{ currentRoute == 'firm_canned_messages_view' ? 'active' : '' }}">
+                <i class="far fa-comment-alt me-2"></i>
+                Canned Messages
+            </a>
+        </li>
+        <li class="mb-2">
+            <a href="{{ path('firm_trash_view') }}" class="nav-link {{ currentRoute == 'firm_trash_view' ? 'active' : '' }}">
+                <i class="fa-solid fa-trash me-2"></i>
+                Trash ({{ trash_count }})
+            </a>
+        </li>
+        {% if app.user.getUserProfile().getUserType() != constant('App\\Entity\\FirmUserProfiles::USER_TYPE_EMPLOYEE') %}
+            <li class="mb-2">
+                <a href="{{ path('support_view') }}" class="nav-link {{ currentRoute == 'support_view' or currentRoute == 'support_view_detail' ? 'active' : '' }}">
+                    <i class="fa-solid fa-life-ring me-2"></i>
+                    Support
+                </a>
+            </li>
+        {% endif %}
+        <li class="mb-2">
+            <a href="{{ path('firm_settings') }}" class="nav-link {{ currentRoute == 'firm_settings'? 'active' : '' }}">
+                <i class="fa-solid fa-gear me-2"></i>
+                Settings
+            </a>
+        </li>
+    </ul>
+    {# ag: container to show storage usage #}
+    <div class="container bg-gray rounded mb-4 p-2">
+        <div class="storage-usage mb-3">
+            <div class="mb-2">
+                <div>
+                    <small class="text-muted">
+                        Plan: <strong>{{ storage_plan.getName() }}</strong>
+                    </small>
+                </div>
+                <div>
+                    <small class="text-muted">
+                        {{ (used_storage / 1024 / 1024) | number_format(2)  }} MB used /
+                        {{ storage_plan.getStorageLabel() }}
+                        {# {{ (plan_limit / 1024 / 1024)|number_format(0) }} MB total #}
+                    </small>
+                </div>
+            </div>
+
+            <div class="progress" style="height: 10px;">
+                <div
+                class="progress-bar
+                    {% if used_percent >= 90 %}
+                        bg-danger
+                    {% elseif used_percent >= 70 %}
+                        bg-warning
+                    {% else %}
+                        bg-success
+                    {% endif %}"
+                role="progressbar"
+                style="width: {{ used_percent|number_format(1) }}%;"
+                aria-valuenow="{{ used_percent|number_format(1) }}"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                ></div>
+            </div>
+
+            <small class="text-muted d-block mt-1">
+                {{ used_percent|number_format(1) }}% of your storage used.
+            </small>
+        </div>
+    </div>
+    <hr>
+    <div class="dropdown">
+        <a href="#" class="d-flex align-items-center justify-content-center text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-solid fa-user pe-4"></i>
+            {# <strong>{{ app.user.getUserProfile().getFirstName() ?? 'User' }}</strong> #}
+            <strong>User</strong>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+            {# <li><a class="dropdown-item" href="#">New project...</a></li>
+            <li><a class="dropdown-item" href="#">Settings</a></li> #}
+            <li class="ps-2 pe-1 pb-2">{{ app.user.getEmail() }}</li>
+            <li class="px-2">
+                <div class="btn-group p-1 d-flex">
+                    <button class="btn btn-outline-primary btn-sm theme-light">
+                        <i class="fa-solid fa-fw fa-sun"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm theme-dark">
+                    <i class="fa-solid fa-fw fa-moon"></i>
+                    </button>
+                </div>
+            </li>
+
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item" href="{{ path('firm_profile_view') }}"><i class="fas fa-user-pen me-2"></i>Profile</a>
+            </li>
+            <li>
+                {% set account = firm is defined and firm ? firm.getAccount() : null %}
+                {% if account %}
+                    <form method="post" action="{{ path('tenant_logout', { account: firm.getAccount() }) }}">
+                {% else %}
+                    <form method="post" action="{{ path('app_logout', { }) }}">
+                {% endif %}                        
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+                    <button class="dropdown-item text-danger" type="submit">
+                        <i class="fa-solid fa-right-from-bracket me-2"></i>Log Out
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</nav>

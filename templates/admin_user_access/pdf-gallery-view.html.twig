@@ -1,0 +1,34 @@
+{% extends 'admin-base.html.twig' %}
+
+{% block title %}Admin - PDF Gallery View{% endblock title %}
+
+{% block body %}
+
+    {% include('/layouts/sections/pdf-gallery-content.html.twig') %}
+    
+    {# to throw notyf message after getting a controller flash call #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                notyf.{{ label }}('{{ message|e('js') }}');
+            });
+            </script>
+        {% endfor %}
+    {% endfor %}
+
+
+    {% block javascript %}
+
+    {% endblock %}
+    {# ag: iterate modals needed, passed from the controller #}
+    {% if modals_to_include is defined %}
+        {% for modal in modals_to_include %}
+            {% include 'layouts/modals/admin/' ~ modal %}
+        {% endfor %}
+    {% endif %}
+    {% include 'layouts/modals/default-template.html.twig' %}
+
+{% endblock %}
+
+

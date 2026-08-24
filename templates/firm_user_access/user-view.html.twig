@@ -1,0 +1,99 @@
+{% extends 'firm-base.html.twig' %}
+
+{% block title %}Firm - User View{% endblock title %}
+
+{% block body %}
+
+    <div class="d-flex w-100 flex-column">
+        {% include 'layouts/sections/search-bar-header.html.twig' %}
+        {% include 'layouts/sections/announcement-banner.html.twig' %}
+        <main class="flex-grow-1 h-100 container-fluid mt-3">
+            <div class="row py-4">
+                <div id="client-view-page-description">
+                    <h3 class="text-primary">Firm Users</h3>
+                    <p class="small text-secondary">See your list of users here.</p>
+                </div>
+
+                <div class="client-view-action-btns mt-4 mb-3">
+                    <div class="firm-dashboard-file-view-btns">
+                        <div class="mb-2">
+                            <button class="btn btn-primary text-white" href="{{ path('firm_add_new_firm_user_modal')}}" data-bs-toggle="modal" data-modal-title="Add New Client" data-dynamic-load="true" 
+                                {% if firm.getFirmUserProfiles|length >= storage_plan.getMaxUsers() %}disabled{% endif %}
+                            >
+                                Add New User
+                            </button>
+                        </div>
+                        {% if firm.getFirmUserProfiles|length >= storage_plan.getMaxUsers() %}
+                            <span class=""><small>Max # of users on this plan has been reached ({{ storage_plan.getMaxUsers() }}). Please consider <a href="{{ path('firm_settings') }}#storage-plan-row">upgrading</a> your plan to add more users.</small></span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <table id="client-view-clients-table" class="table table-striped table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            {# <th>Id</th> #}
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Title</th>
+                            <th>Active</th>
+                            <th>User Type</th>
+                            <th>Created Date</th>
+                            <th>Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for userProfile in firm.getFirmUserProfiles() %}
+                            {# ag: skip current logged in user. They can update their profile in the settings page #}
+                            {% if userProfile.getUser() != app.user %}
+                                <tr>
+                                    {# <td>{{ userProfile.getId() }}</td> #}
+                                    <td>{{ userProfile.getFullName() }}</td>
+                                    <td>{{ userProfile.getUser().getEmail() }}</td>
+                                    <td>{{ userProfile.getTitle() }}</td>
+                                    <td>{% if userProfile.getUser().getIsActive() is true %}Active{% else %}Inactive{% endif %}</td>
+                                    <td>{{ userProfile.getUserType() }}</td>
+                                    <td>{{ userProfile.getCreatedAt()|date('Y-m-d g:ia T', app_timezone ) }}</td>
+                                    <td class="text-center">
+                                        <a class="btn btn-primary text-white" href="{{ path('firm_user_view_modal', { firmUserProfile: userProfile.getId() } )}} " data-bs-toggle="modal" data-modal-title="Edit User Profile" data-dynamic-load="true" data-bs-target="#defaultTemplateModal">Edit</a>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        {% include 'layouts/sections/footer.html.twig' %}
+
+    </div>
+
+    {# to throw notyf message after getting a controller flash call #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                notyf.{{ label }}('{{ message|e('js') }}');
+            });
+            </script>
+        {% endfor %}
+    {% endfor %}
+
+    {% block javascript %}
+        <script>
+        </script>
+
+    {% endblock %}
+
+    {# ag: iterate modals needed, passed from the controller #}
+    {% if modals_to_include is defined %}
+        {% for modal in modals_to_include %}
+            {% include 'layouts/modals/firm/' ~ modal %}
+        {% endfor %}
+    {% endif %}
+    {% include 'layouts/modals/default-template.html.twig' %}
+
+{% endblock %}
+

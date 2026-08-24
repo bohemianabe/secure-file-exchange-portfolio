@@ -1,0 +1,157 @@
+
+{% extends 'admin-base.html.twig' %}
+
+{% block title %}Admin Dashboard{% endblock title %}
+
+{% block body %}
+    <h1 class="h3 mb-3 text-secondary">Welcome back, {{ app.user.getUserProfile().getUserFullName() }}!</h1>
+    {# ag: used to get the data in admin/chart.js to generate the charts at the top of the page #}
+    <span id="dashboardActiveFirmsValue" hidden>
+        {{ chart_data.activeFirmMetrics }}
+    </span>
+
+
+    <div class="row text-center mb-4">
+        <div class="col-6 d-flex flex-wrap justify-content-center admin-dashboard-metric-div">
+            <canvas class="chart-container" id="admin-dashboard-metric-1"></canvas>
+        </div>
+        <div class="col-6 d-flex flex-wrap justify-content-center admin-dashboard-metric-div">
+            <canvas class="chart-container" id="admin-dashboard-metric-2"></canvas>
+        </div>
+        {# <div class="col">
+            <canvas id="metric3"></canvas>
+            <p>Storage Used</p>
+        </div> #}
+    </div>
+
+    <div class="admin-title-bar mt-4">
+
+        <div class="admin-title-bar-btns text-end">
+            <a class="btn btn-primary text-white" href="{{ path('admin_add_new_firm_modal', { }) }}" 
+                data-bs-toggle="modal" data-modal-title="Add New Firm" data-bs-target="#defaultTemplateModal" data-dynamic-load="true"
+                >Add New Firm</a>
+            <a type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#adminImportFirmModal">Import Firms</a>
+        </div>
+        <div>
+            <a href="{{ path('admin_profile_view') }}#csv-import">
+                Download Firm Import Template CSV
+            </a>
+        </div>
+    </div>
+    <div class="container py-4">
+        <h1 class="h3 mb-3">Firms</h1>
+        <table id="admin-dashboard-view-table" class="table table-striped table-bordered align-middle">
+            <thead>
+                <tr>
+                    {# <th>Id</th> #}
+                    <th>Firm Name</th>
+                    <th>Firm Account Name</th>
+                    <th>Storage Plan</th>
+                    <th>Phone</th>
+                    <th>Active</th>
+                    <th>Created Date</th>
+                    <th>Updated Date</th>
+                    <th>View</th>
+                </tr>
+            </thead>
+            {# <tbody> 
+                {% for firm in firms %}
+                <tr>
+                    <td>{{ firm.getId() }}</td>
+                    <td>{{ firm.getName() }}</td>
+                    <td>{{ firm.getAccount() }}</td>
+                    <td>{{ firm.getStoragePlan().name }}</td>
+                    <td>{{ firm.getPhone() }}</td>
+                    <td>{% if firm.getActive() == true %}Active{% else %}Inactive{% endif %}</td>
+                    <td>{{ firm.getCreatedAt()|date('Y-m-d g:ia T', app_timezone ) }}</td>
+                    <td>{{ firm.getUpdatedAt()|date('Y-m-d g:ia T', app_timezone ) }}</td>
+                    <td class="text-center">
+                        <a href="{{ path('admin_firm_view', { firm: firm.getId() }) }}">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>#}
+        </table>
+    </div>
+
+    <div class="container py-4">
+        <div>
+            <h1 class="h3 mb-3">Soft Deleted Firms</h1>
+            <p>Firms will be permenantly deleted within seven days of <strong>deleted at</strong> date</p>
+        </div>
+
+        <table id="admin-dashboard-view-soft-delete-table" class="table table-striped table-bordered align-middle">
+            <thead>
+                <tr>
+                <th>Id</th>
+                <th>Firm Name</th>
+                <th>Firm Account Name</th>
+                <th>Storage Plan</th>
+                <th>Phone</th>
+                <th>Deleted At</th>
+                <th>Restore Firm</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for firm in softDeletedFirms %}
+                <tr>
+                    <td>{{ firm.getId() }}</td>
+                    <td>{{ firm.getName() }}</td>
+                    <td>{{ firm.getAccount() }}</td>
+                    <td>{{ firm.getStoragePlan().name }}</td>
+                    <td>{{ firm.getPhone() }}</td>
+                    <td>{{ firm.getDeletedAt()|date('Y-m-d g:ia T', app_timezone ) }}
+                    <td class="text-center">
+                        <a class="btn btn-success text-white" href="{{ path('admin_ajax_restore_soft_delete_firm_modal', { firmId: firm.getId() })}}"  data-bs-toggle="modal" data-modal-title="Restore Firm" data-modal-size="modal-md" data-dynamic-load="true">Restore</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if showTwoFactorPrompt %}
+        <div
+            class="modal fade"
+            id="twoFactorPromptModal"
+            tabindex="-1"
+            aria-labelledby="twoFactorPromptModalLabel"
+            aria-hidden="true"
+            data-auto-show="true"
+        >
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-secondary text-white">
+                        <h5 class="modal-title" id="twoFactorPromptModalLabel">Protect Your Account</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        Add an extra layer of security by enabling two-factor authentication.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Later</button>
+                        <a href="{{ path('admin_profile_view') }}" class="btn btn-primary">Enable 2FA</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% block javascript %}
+        <script id="dashboardStoragePlanData" type="application/json">
+            {{ chart_data.storagePlanMetrics|json_encode|raw }}
+        </script>
+
+    {% endblock %}
+    {{ encore_entry_script_tags('adminCharts') }}
+
+    {# ag: iterate modals needed, passed from the controller #}
+    {% if modals_to_include is defined %}
+        {% for modal in modals_to_include %}
+            {% include 'layouts/modals/admin/' ~ modal %}
+        {% endfor %}
+    {% endif %}
+    {% include 'layouts/modals/default-template.html.twig' %}
+
+{% endblock %}
+
+

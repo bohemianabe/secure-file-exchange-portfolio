@@ -1,0 +1,14 @@
+twig:
+    file_name_pattern: '*.twig'
+    globals:
+        app_name: '%env(string:APP_NAME)%'
+        app_domain: '%env(string:APP_DOMAIN)%'
+        app_timezone: '%env(string:APP_TIMEZONE)%'
+        firm_logo_path: '%firm_logo_dir%'
+        firm_banner_path: '%firm_banner_dir%'
+        # firm_user_types: '%firm.user_types%'
+        # tinymce_key: '%env(string:TINYMCE_KEY)%'
+
+when@test:
+    twig:
+        strict_variables: true

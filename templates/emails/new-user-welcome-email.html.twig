@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Welcome to {{ app_name }}</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        color: #212529;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 20px;
+      }
+      h1 {
+        font-size: 20px;
+        color: #0d6efd;
+      }
+      p {
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .btn {
+        display: inline-block;
+        margin: 20px 0;
+        padding: 12px 18px;
+        background-color: #0d6efd;
+        color: #ffffff !important;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .footer {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 20px;
+        border-top: 1px solid #dee2e6;
+        padding-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Welcome to {{ app_name }}, {{ user.getUserProfile().getFirstName()|default('') }}</h1>
+
+      <p>
+          Your account has been created. To get started, please set your password using the secure link below: 
+      </p>
+
+      <p style="text-align:center; margin: 20px 0;">
+          <a href="{{ setPasswordUrl }}" style="background-color:#3b82f6; color:#fff; padding:10px 20px;text-decoration:none;border-radius:5px;">
+            Set Your Password
+          </a>
+      </p>
+
+      <p>
+          For your security, this link will expire on 
+          <strong>{{ user.firstLoginTokenExpiresAt|date('F j, Y, g:i a') }}</strong>.
+      </p>        
+
+      <p>
+          If you did not expect this email, please ignore it.
+      </p>
+
+      <hr>
+
+      <p>
+          Thanks, <br>
+          The {{ app_name }} Team
+      </p>
+
+      <div class="footer">
+        <p>This is an automated message, please do not reply.</p>
+        <p>&copy; {{ "now"|date("Y") }} {{ app_name }}</p>
+      </div>
+    </div>
+  </body>
+</html>

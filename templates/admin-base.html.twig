@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+		{# ag: site flavicon #}
+		<link rel="icon" href="{{ asset('images/secure-file-color.svg') }}">
+
+		<link rel="stylesheet" href="{{ asset('styles/site-wide-styling.css') }}">
+		<link rel="stylesheet" href="{{ asset('styles/theme.css') }}">
+		<link rel="stylesheet" href="{{ asset('styles/admin-styling.css') }}">
+
+		{# <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css"> #}
+		<title>{% block title %}{{ app_name }}{% endblock %}</title>
+
+		{% block styles %}{% endblock %}
+		{% block stylesheets %}
+		{{ encore_entry_link_tags('app') }}
+		{% endblock %}
+
+	</head>
+
+	<header class="navbar bg-body-tertiary 
+		{# container #}
+		navbar-expand-lg 
+		bg-body-tertiary sticky-top border-bottom p-4">
+		<div class="container ps-1 pe-1">
+			<div class="d-flex align-items-center">
+				<a class="me-2" href="{{ path('admin_dashboard') }}"><img src="{{ asset('images/secure-file-color.png') }}" style="height:3rem;" /></a> 
+				<span class="vr mx-2"></span>
+				<span class="fw-semibold fs-5 text-secondary">{{ app_name }}</span>
+			</div>
+			<button class="navbar-toggler" id="admin-navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span> 
+			</button>
+			<div class="offcanvas 
+				offcanvas-end
+				" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+				<div class="offcanvas-header bg-secondary text-white">
+					<h5 class="offcanvas-title" id="offcanvasNavbarLabel">{{ app_name }}</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+				</div>
+				<div class="offcanvas-body d-lg-flex align-items-lg-center flex-wrap justify-content-lg-end"> 
+					{# ag: include the dynamic menu for all user profiles here #}
+					{% include 'layouts/sections/user-profiles-header-nav.html.twig' %}
+				</div>
+			</div>
+		</div>
+
+	</header>
+
+	<body class="">
+		{% include 'layouts/sections/announcement-banner.html.twig' %}
+		<main class="container py-5">
+		{% block body %}{% endblock %}
+			{# ag: for page animation when ajax is called and page is loading/processing a submission #}
+			<div id="page-loader" class="page-loader d-none">
+				<div class="loading-dots">
+					<span></span><span></span><span></span>
+				</div>
+				<div class="progress d-none" id="upload-progress">
+					<div
+						class="progress-bar progress-bar-striped progress-bar-animated"
+						id="upload-progress-bar"
+						role="progressbar"
+						style="width: 0%"
+						aria-valuenow="0"
+						aria-valuemin="0"
+						aria-valuemax="100"
+						>
+						0%
+					</div>
+				</div>
+				<div class="d-none" id="page-loader-text-div">
+					<p class="">Please Remain On The Page While Your Data Loads.</p>
+				</div>
+			</div>
+		</main>
+		<audio id="new-notification-sound" preload="auto">
+			<source src="{{ asset('sounds/notification-alert.mp3') }}" type="audio/mpeg">
+		</audio>
+
+		{% block javascripts %}
+			<script src="https://cdn.jsdelivr.net/npm/hugerte@1/hugerte.min.js"></script>
+			{{ encore_entry_script_tags('site-wide') }}
+			{{ encore_entry_script_tags('admin') }}
+		{% endblock %}
+	</body>
+</html>

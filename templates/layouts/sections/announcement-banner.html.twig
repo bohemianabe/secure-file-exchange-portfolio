@@ -1,0 +1,30 @@
+{% if site_announcement is defined and site_announcement is not null %}
+    {% if is_granted('ROLE_ADMIN') %}
+        {% set role = 'admin' %}
+    {% elseif is_granted('ROLE_FIRM') %}
+        {% set role = 'firm' %}
+    {% elseif is_granted('ROLE_CLIENT') %}
+        {% set role = 'client' %} 
+    {% endif %}
+    <div id="site-announcement-{{ site_announcement.id }}"
+        {# ag: since type is now an enum when templating its value use '.value' #}
+         class="alert alert-{{ site_announcement.type.value }} alert-dismissible fade show mb-0 rounded-0 text-center w-100 align-content-center"
+         role="alert"
+         data-announcement-id="{{ site_announcement.id }}"
+         data-dismiss-url="{{ path('announcement_dismiss', { id: site_announcement.id, role: role }) }}">
+        
+        {% if site_announcement.title %}
+            <strong>{{ site_announcement.title }}</strong>
+        {% endif %}
+
+        {{ site_announcement.message }}
+
+        {% if site_announcement.linkUrl and site_announcement.linkText %}
+            <a href="{{ site_announcement.linkUrl }}" class="alert-link ms-2">
+                {{ site_announcement.linkText }}
+            </a>
+        {% endif %}
+
+        <button type="button" class="btn-close announcement-dismiss-btn" aria-label="Close"></button>
+    </div>
+{% endif %}

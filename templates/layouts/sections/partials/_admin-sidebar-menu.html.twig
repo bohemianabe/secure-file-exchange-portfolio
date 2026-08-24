@@ -1,0 +1,124 @@
+
+
+<ul class="nav 
+    ms-auto 
+    flex-column flex-lg-row align-items-lg-center gap-lg-1">
+    <li class="nav-item">
+        <a href="{{ path('admin_dashboard')}}" class="nav-link d-flex flex-column align-items-center text-center {{ currentRoute == 'admin_dashboard' ? 'active' : '' }}">
+            <span class="position-relative d-inline-block">
+                <i class="fas fa-chalkboard fa-lg mb-3"></i>
+            </span>
+            <span>Dashboard</span>
+        </a>
+    </li>
+    <li class="nav-item dropdown text-center">
+        <a 
+            class="nav-link 
+            {% if currentRoute == 'admin_pdf_view' or currentRoute == 'admin_administrator_view' %}active{% endif %}
+            d-flex flex-column align-items-center"
+            href="#" 
+            id="adminDropdown" 
+            role="button"
+            data-bs-toggle="dropdown" 
+            aria-expanded="false">
+            <span class="position-relative d-inline-block">
+                <i class="fas fa-toolbox fa-lg mb-2"></i>
+            </span>
+            <div class="d-flex align-items-center gap-1">
+                <span class=" mt-1">Administration</span>
+                <i class="fa-solid fa-caret-down mt-1"></i>
+            </div>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="adminDropdown">
+            <li>
+                <a class="dropdown-item" href="{{ path('admin_administrator_view') }}">
+                    <i class="fas fa-cogs me-2"></i>
+                    Utilities
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="{{ path('admin_pdf_view') }}">
+                    <i class="far fa-file-pdf me-2"></i>
+                    PDF Gallery
+                </a>
+            </li>
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="{{ path('storage_plan_view')}}" 
+            class="nav-link d-flex flex-column align-items-center text-center {{ currentRoute == 'storage_plan_view' ? 'active' : '' }}">
+            <span class="position-relative d-inline-block">
+                <i class="fas fa-box-open fa-lg mb-3"></i>
+            </span>
+            <span>Storage Plans</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="{{ path('audit_log_view')}}" class="nav-link d-flex flex-column align-items-center text-center {{ currentRoute == 'audit_log_view' ? 'active' : '' }}">
+            <span class="position-relative d-inline-block">
+                <i class="fas fa-newspaper fa-lg mb-3"></i>
+            </span>
+            <span>Audit Logs</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="{{ path('admin_ticket_view') }}"
+        class="nav-link d-flex flex-column align-items-center text-center {{ currentRoute == 'admin_ticket_view' or currentRoute == 'admin_ticket_view_detail' ? 'active' : '' }}">
+            <span class="position-relative d-inline-block">
+                <i class="fas fa-ticket fa-lg mb-3"></i>
+                {% if isOpenStatusTicket is defined and isOpenStatusTicket is true %}
+                    <span class="admin-ticket-alert-dot position-absolute translate-middle p-1 bg-danger border border-light rounded-circle">
+                    </span>
+                {% endif %}
+            </span>
+
+            <span>Tickets</span>
+        </a>
+    </li>
+    {# Account dropdown (stays at end) #}
+    <li class="nav-item dropdown ms-lg-4 text-center">
+        <a 
+            class="nav-link d-flex flex-column align-items-center"
+            href="#" 
+            id="userMenu" 
+            role="button"
+            data-bs-toggle="dropdown" 
+            aria-expanded="false">
+            <span class="position-relative d-inline-block">
+                <i class="fas fa-circle-user fa-lg mb-2"></i>
+            </span>
+            <div class="d-flex align-items-center gap-1">
+                <span class="fw-semibold mt-1">Account</span>
+                <i class="fa-solid fa-caret-down mt-1"></i>
+            </div>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu">
+            <li class="px-3 py-2 small">
+                <div class="fw-semibold">{{ app.user.getUserProfile().getUserFullName() ?? 'Account' }}</div>
+                <div class="">{{ app.user.email }}</div>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li class="px-2">
+                <div class="btn-group p-1 d-flex">
+                    <button class="btn btn-outline-primary btn-sm theme-light">
+                        <i class="fa-solid fa-fw fa-sun"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm theme-dark">
+                    <i class="fa-solid fa-fw fa-moon"></i>
+                    </button>
+                </div>
+            </li>
+            <li>
+                <a class="dropdown-item" href="{{ path('admin_profile_view') }}"><i class="fas fa-user-pen me-2"></i>Profile & Settings</a>
+            </li>
+            <li>
+                <form method="post" action="{{ path('admin_logout') }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+                    <button class="dropdown-item text-danger" type="submit">
+                        <i class="fa-solid fa-right-from-bracket me-2"></i>Log Out
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </li>
+</ul>

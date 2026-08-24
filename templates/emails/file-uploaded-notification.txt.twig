@@ -1,0 +1,24 @@
+{{ recipientClient.getName()|default('Hello there,') }},
+
+{% if writtenMessage is defined and writtenMessage is not null %}
+{{ writtenMessage }}
+{% else %}
+A new file has been uploaded by {{ senderUserProfile.getFullName()|default('your team ') }} on {{ app_name }} and is now available for viewing.
+{% endif %}
+
+Please log in at your earliest convenience. 
+{{ linkUrl }}
+
+{# ag: add this code to check for when CUP uploads a file. CUP do not have a signature datapoint #}
+{% if attribute(senderUserProfile, 'signature') is defined
+   and attribute(senderUserProfile, 'signature') is not empty %}
+    {{ attribute(senderUserProfile, 'signature')|raw }}
+{% else %}
+
+Thanks,
+The {{ app_name }} Team
+---
+{% endif %}
+
+This is an automated message, please do not reply.
+© {{ "now"|date("Y") }} {{ app_name }}

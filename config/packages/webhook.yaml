@@ -1,0 +1,6 @@
+framework:
+    webhook:
+        routing:
+            dropbox_sign:
+                service: App\Webhook\DropboxSignRequestParser
+                secret: '%env(DROPBOX_SIGN_API_KEY)%'
