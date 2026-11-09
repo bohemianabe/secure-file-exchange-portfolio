@@ -1,1 +1,2 @@
-.DS_store
+# macOS system files. .DS_Store is a hidden file automatically created by macOS to store folder-specific settings, such as icon positions, view preferences, and sorting options.
+.DS_Store

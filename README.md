@@ -17,12 +17,13 @@ third-party API integrations.
 
 ## Screenshots
 
-![Dashboard](docs/screenshots/dashboard.png)
+## Screenshots
 
-![File Manager](docs/screenshots/file-manager.png)
+![Dashboard](docs/screenshot/firm-dashboard.png)
 
-![Signature Templates](docs/screenshots/signature-template-gallery.png)
+![File Manager](docs/screenshot/file-manager.png)
 
+![Signature Templates](docs/screenshot/docusign-template-gallery.png)
 ---
 
 ## Technology Stack
